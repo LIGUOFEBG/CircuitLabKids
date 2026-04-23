@@ -248,6 +248,32 @@ const ExperimentScreen: React.FC<ExperimentScreenProps> = ({ navigation, route }
     addElement(type, x, y);
   };
 
+  // 预设元件布局：按实验类型摆放在合理位置
+  const handleLoadPreset = () => {
+    if (!experimentId) return;
+    const cx = width / 2;
+    switch (experimentId) {
+      case 'simple-circuit':
+      case 'switch-circuit':
+        addElement('battery', cx - 200, 160);
+        addElement('switch', cx - 20, 80);
+        addElement('bulb', cx + 120, 160);
+        break;
+      case 'series-circuit':
+        addElement('battery', cx - 200, 180);
+        addElement('switch', cx - 20, 80);
+        addElement('bulb', cx + 80, 100);
+        addElement('bulb', cx + 80, 260);
+        break;
+      case 'parallel-circuit':
+        addElement('battery', cx - 200, 200);
+        addElement('switch', cx - 20, 80);
+        addElement('bulb', cx + 100, 100);
+        addElement('bulb', cx + 100, 300);
+        break;
+    }
+  };
+
   const handleClearCircuit = () => {
     Alert.alert('清空电路', '确定要清空所有元件吗？', [
       { text: '取消', style: 'cancel' },
@@ -394,8 +420,13 @@ const ExperimentScreen: React.FC<ExperimentScreenProps> = ({ navigation, route }
             <View style={styles.emptyCanvas}>
               <Text style={styles.emptyText}>🎯 从这里开始</Text>
               <Text style={styles.emptySubtext}>
-                从下方拖拽元件到画布上，连接它们组成电路
+                从下方添加元件到画布上，连接它们组成电路
               </Text>
+              {experimentId && (
+                <TouchableOpacity style={styles.presetBtn} onPress={handleLoadPreset} activeOpacity={0.8}>
+                  <Text style={styles.presetBtnText}>⚡ 一键摆放实验元件</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ) : (
             <>
@@ -501,7 +532,19 @@ const styles = StyleSheet.create({
   canvas: { flex: 1, backgroundColor: '#F8F9FA', position: 'relative' },
   emptyCanvas: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   emptyText: { fontSize: isTablet ? 24 : 20, fontWeight: 'bold', color: '#BDC3C7', marginBottom: 12 },
-  emptySubtext: { fontSize: isTablet ? 16 : 14, color: '#BDC3C7', textAlign: 'center', lineHeight: 20 },
+  emptySubtext: { fontSize: isTablet ? 16 : 14, color: '#BDC3C7', textAlign: 'center', lineHeight: 20, marginBottom: 20 },
+  presetBtn: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 24,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    shadowColor: '#4A90E2',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  presetBtnText: { fontSize: isTablet ? 17 : 15, fontWeight: 'bold', color: '#fff' },
   statusPanelWrapper: { position: 'absolute', bottom: 12, left: 12, right: 12 },
   controlPanel: { backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#ECF0F1' },
   actionButtons: {
