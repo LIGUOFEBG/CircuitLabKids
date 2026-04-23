@@ -31,6 +31,8 @@ interface CircuitCanvasProps {
   onElementLongPress?: (elementId: string) => void;
   /** 当前选中的元件ID（连接模式下高亮） */
   selectedElementId?: string | null;
+  /** 长按连接线时的回调 */
+  onConnectionLongPress?: (connectionId: string) => void;
 }
 
 /**
@@ -52,6 +54,7 @@ const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
   onCanvasPress,
   onElementLongPress,
   selectedElementId = null,
+  onConnectionLongPress,
 }) => {
   // 根据连接信息找到两端连接点的绝对坐标
   const getConnectionCoords = (connection: CircuitConnection) => {
@@ -143,6 +146,7 @@ const CircuitCanvas: React.FC<CircuitCanvasProps> = ({
             x2={coords.x2}
             y2={coords.y2}
             color={coords.color}
+            onLongPress={onConnectionLongPress ? () => onConnectionLongPress(connection.id) : undefined}
           />
         );
       })}
