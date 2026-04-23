@@ -66,6 +66,10 @@ yarn-error.log
 # testing
 /coverage
 
+# Claude Code
+.claude/
+claude_history.txt
+
 # Yarn
 .yarn/*
 !.yarn/patches
