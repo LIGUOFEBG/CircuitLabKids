@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../App';
 import { useCircuit } from '../../core/circuit/context/CircuitContext';
+import { markExperimentCompleted } from '../../utils/completionStorage';
 import { CircuitElementType, CircuitElement, CircuitConnection, ConnectionPoint, CircuitState } from '../../core/circuit/models/types';
 import { CircuitCanvas, CircuitStatusPanel, ElementPalette } from '../../components/circuit';
 
@@ -85,6 +86,14 @@ function buildSteps(experimentId: string, state: CircuitState): Step[] {
         { label: '③加开关', hint: '点下方"开关"按钮', done: hasSwitch },
         { label: '④并联连接', hint: '每个灯泡都连到电池两端', done: connCount >= 4 },
         { label: '⑤闭合开关', hint: '比较并联与串联的灯泡亮度差别', done: switchClosed && state.isComplete },
+      ];
+    case 'switch-circuit':
+      return [
+        { label: '①加电池', hint: '点下方"电池"按钮', done: hasBattery },
+        { label: '②加灯泡', hint: '点下方"灯泡"按钮', done: hasBulb },
+        { label: '③加开关', hint: '点下方"开关"按钮', done: hasSwitch },
+        { label: '④连接元件', hint: '点"连接"，再依次点两个元件', done: connCount >= 2 },
+        { label: '⑤闭合开关', hint: '点击开关控制灯的亮灭', done: switchClosed && state.isComplete },
       ];
     default:
       return [];
@@ -241,6 +250,14 @@ const ExperimentScreen: React.FC<ExperimentScreenProps> = ({ navigation, route }
     () => (experimentId ? buildSteps(experimentId, state) : []),
     [experimentId, state]
   );
+
+  // 所有步骤完成时持久化记录
+  const allStepsDone = steps.length > 0 && steps.every(s => s.done);
+  useEffect(() => {
+    if (allStepsDone && experimentId) {
+      markExperimentCompleted(experimentId);
+    }
+  }, [allStepsDone, experimentId]);
 
   const handleAddElement = (type: CircuitElementType) => {
     const x = Math.random() * (width - 100) + 50;
@@ -436,6 +453,7 @@ const ExperimentScreen: React.FC<ExperimentScreenProps> = ({ navigation, route }
                 showGrid={true}
                 interactive={!isConnectMode}
                 selectedElementId={connectingFromId}
+                isCircuitActive={state.isComplete}
                 onElementSelect={handleElementSelect}
                 onElementDrag={handleElementDrag}
                 onCanvasPress={handleCanvasPress}
